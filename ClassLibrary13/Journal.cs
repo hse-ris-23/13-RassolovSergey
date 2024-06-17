@@ -12,10 +12,20 @@ namespace ClassLibrary13
         // Список объектов JournalEntry
         private List<JournalEntry> entries = new List<JournalEntry>();
 
+        public Journal()
+        {
+            entries = new List<JournalEntry>();
+        }
+
         // Метод для добавления записи в журнал
         public void AddEntry(JournalEntry entry)
         {
             entries.Add(entry);
+        }
+
+        public int GetEntriesCount()
+        {
+            return entries.Count;
         }
 
         // Перегруженная версия метода ToString для вывода всех записей журнала
