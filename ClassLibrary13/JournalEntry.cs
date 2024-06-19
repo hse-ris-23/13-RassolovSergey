@@ -32,5 +32,4 @@ namespace ClassLibrary13
             return $"Коллекция: {CollectionName}, Тип изменения: {ChangeType}, Данные объекта: {ObjectData}";
         }
     }
-
 }

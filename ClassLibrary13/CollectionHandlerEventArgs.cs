@@ -6,9 +6,6 @@ using System.Threading.Tasks;
 
 namespace ClassLibrary13
 {
-    // Определение делегата CollectionHandler
-    public delegate void CollectionHandler(object source, CollectionHandlerEventArgs args);
-
     // Определение класса CollectionHandlerEventArgs
     public class CollectionHandlerEventArgs : EventArgs
     {
@@ -20,6 +17,18 @@ namespace ClassLibrary13
 
         // Конструктор по умолчанию
         public CollectionHandlerEventArgs() { }
+
+        // Конструктор для инициализации свойства ChangeType
+        public CollectionHandlerEventArgs(string changeType)
+        {
+            ChangeType = changeType;
+        }
+
+        // Конструктор для инициализации свойства ChangedItem
+        public CollectionHandlerEventArgs(object changedItem)
+        {
+            ChangedItem = changedItem;
+        }
 
         // Конструктор с параметрами для инициализации свойств
         public CollectionHandlerEventArgs(string changeType, object changedItem)

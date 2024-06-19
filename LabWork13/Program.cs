@@ -13,131 +13,258 @@ namespace LabWork13
     {
         static void Main(string[] args)
         {
-            // Создание двух коллекций
-            MyObservableCollection<Card> collection1 = new MyObservableCollection<Card>();
-            MyObservableCollection<Card> collection2 = new MyObservableCollection<Card>();
+            var collection1 = new MyObservableCollection<Card>("Collection 1");
+            var collection2 = new MyObservableCollection<Card>("Collection 2");
 
-            // Создание двух объектов типа Journal
-            Journal journal1 = new Journal();
-            Journal journal2 = new Journal();
+            var journal1 = new Journal();
+            var journal2 = new Journal();
 
-            // Подписка journal1 на события CollectionCountChanged и CollectionReferenceChanged из первой коллекции
-            collection1.CollectionCountChanged += (sender, e) => journal1.AddEntry(new JournalEntry("Коллекция 1", e.ChangeType, e.ChangedItem.ToString()));
-            collection1.CollectionReferenceChanged += (sender, e) => journal1.AddEntry(new JournalEntry("Коллекция 1", e.ChangeType, e.ChangedItem.ToString()));
+            collection1.CountChanged += journal1.OnCountChanged;
+            collection1.ReferenceChanged += journal1.OnReferenceChanged;
 
-            // Подписка journal2 на события CollectionReferenceChanged из обеих коллекций
-            collection1.CollectionReferenceChanged += (sender, e) => journal2.AddEntry(new JournalEntry("Коллекция 1", e.ChangeType, e.ChangedItem.ToString()));
-            collection2.CollectionReferenceChanged += (sender, e) => journal2.AddEntry(new JournalEntry("Коллекция 2", e.ChangeType, e.ChangedItem.ToString()));
+            collection2.CountChanged += journal2.OnCountChanged;
+            collection2.ReferenceChanged += journal2.OnReferenceChanged;
 
-            bool exit = false;
-
-            while (!exit)
+            bool running = true;
+            while (running)
             {
-                Console.WriteLine("======== Главное меню ========");
-                Console.WriteLine("1. Работа с коллекцией 1");
-                Console.WriteLine("2. Работа с коллекцией 2");
-                Console.WriteLine("3. Показать журнал 1");
-                Console.WriteLine("4. Показать журнал 2");
-                Console.WriteLine("0. Выйти");
-                Console.WriteLine("==============================");
+                Console.WriteLine("Меню:");
+                Console.WriteLine("1. Работа с коллекциями");
+                Console.WriteLine("2. Работа с журналами");
+                Console.WriteLine("0. Выход из программы");
+                Console.Write("Выберите действие: ");
 
-                int choice = (int)InputHelper.InputUintNumber("Выбранное действие: \t");
+                string choice = Console.ReadLine();
 
                 switch (choice)
                 {
-                    case 1:
-                        CollectionMenu(collection1, "Коллекция 1");
+                    case "1":
+                        WorkWithCollectionsMenu(collection1, collection2);
                         break;
-                    case 2:
-                        CollectionMenu(collection2, "Коллекция 2");
+                    case "2":
+                        WorkWithJournalsMenu(journal1, journal2);
                         break;
-                    case 3:
-                        Console.WriteLine(journal1);
-                        break;
-                    case 4:
-                        Console.WriteLine(journal2);
-                        break;
-                    case 0:
-                        exit = true;
+                    case "0":
+                        running = false;
                         break;
                     default:
-                        Console.WriteLine("Неверный выбор. Попробуйте снова.");
+                        Console.WriteLine("Неверный выбор. Попробуйте еще раз.");
                         break;
                 }
             }
         }
 
-        static void CollectionMenu(MyObservableCollection<Card> collection, string collectionName)
+        static void WorkWithCollectionsMenu(MyObservableCollection<Card> collection1, MyObservableCollection<Card> collection2)
         {
-            bool back = false;
-
-            while (!back)
+            bool running = true;
+            while (running)
             {
-                Console.WriteLine($"========== {collectionName} меню ==========");
-                Console.WriteLine("1. Добавить элемент");
-                Console.WriteLine("2. Удалить элемент");
-                Console.WriteLine("3. Изменить элемент");
+                Console.WriteLine("Меню работы с коллекциями:");
+                Console.WriteLine("1. Коллекция №1");
+                Console.WriteLine("2. Коллекция №2");
                 Console.WriteLine("0. Назад");
-                Console.WriteLine("================================");
+                Console.Write("Выберите действие: ");
 
-                int choice = (int)InputHelper.InputUintNumber("Выбранное действие: \t");
+                string choice = Console.ReadLine();
 
                 switch (choice)
                 {
-                    case 1:
-                        AddElement(collection);
+                    case "1":
+                        CollectionMenu(collection1);
                         break;
-                    case 2:
-                        RemoveElement(collection);
+                    case "2":
+                        CollectionMenu(collection2);
                         break;
-                    case 3:
-                        ModifyElement(collection);
-                        break;
-                    case 0:
-                        back = true;
+                    case "0":
+                        running = false;
                         break;
                     default:
-                        Console.WriteLine("Неверный выбор. Попробуйте снова.");
+                        Console.WriteLine("Неверный выбор. Попробуйте еще раз.");
                         break;
                 }
             }
         }
 
-        static void AddElement(MyObservableCollection<Card> collection)
+        static void CollectionMenu(MyObservableCollection<Card> collection)
         {
+            bool running = true;
+            while (running)
+            {
+                Console.WriteLine($"Меню коллекции {collection.Name}:");
+                Console.WriteLine("1. Добавить элемент в коллекцию");
+                Console.WriteLine("2. Изменить элемент в коллекции");
+                Console.WriteLine("3. Удалить элемент из коллекции");
+                Console.WriteLine("4. Напечатать коллекцию");
+                Console.WriteLine("0. Назад");
+                Console.Write("Выберите действие: ");
+
+                string choice = Console.ReadLine();
+
+                switch (choice)
+                {
+                    case "1":
+                        AddCardToCollection(collection);
+                        break;
+                    case "2":
+                        UpdateCardInCollection(collection);
+                        break;
+                    case "3":
+                        RemoveCardFromCollection(collection);
+                        break;
+                    case "4":
+                        PrintCollection(collection);
+                        break;
+                    case "0":
+                        running = false;
+                        break;
+                    default:
+                        Console.WriteLine("Неверный выбор. Попробуйте еще раз.");
+                        break;
+                }
+            }
+        }
+
+        static void WorkWithJournalsMenu(Journal journal1, Journal journal2)
+        {
+            bool running = true;
+            while (running)
+            {
+                Console.WriteLine("Меню работы с журналами:");
+                Console.WriteLine("1. Вывести информацию из журнала №1");
+                Console.WriteLine("2. Вывести информацию из журнала №2");
+                Console.WriteLine("0. Назад");
+                Console.Write("Выберите действие: ");
+
+                string choice = Console.ReadLine();
+
+                switch (choice)
+                {
+                    case "1":
+                        PrintJournal(journal1);
+                        break;
+                    case "2":
+                        PrintJournal(journal2);
+                        break;
+                    case "0":
+                        running = false;
+                        break;
+                    default:
+                        Console.WriteLine("Неверный выбор. Попробуйте еще раз.");
+                        break;
+                }
+            }
+        }
+
+        static void AddCardToCollection(MyObservableCollection<Card> collection)
+        {
+            Console.WriteLine("1. Инициализировать вручную");
+            Console.WriteLine("2. Инициализировать случайным образом");
+            Console.Write("Выберите действие: ");
+
+            string choice = Console.ReadLine();
+
             Card newCard = new Card();
-            newCard.Init();
+            if (choice == "1")
+            {
+                newCard.Init();
+            }
+            else
+            {
+                newCard.RandomInit();
+            }
+
             collection.Add(newCard);
             Console.WriteLine("Элемент добавлен.");
         }
 
-        static void RemoveElement(MyObservableCollection<Card> collection)
+        static void RemoveCardFromCollection(MyObservableCollection<Card> collection)
         {
-            Console.WriteLine("Введите индекс элемента для удаления:");
-            if (int.TryParse(Console.ReadLine(), out int index) && index >= 0 && index < collection.Count)
+            if (collection.Count == 0)
             {
-                collection.Remove(collection[index]);
-                Console.WriteLine("Элемент удален.");
+                Console.WriteLine("Коллекция пуста.");
             }
             else
             {
-                Console.WriteLine("Неверный индекс.");
+                Console.WriteLine("Введите данные карты для удаления:");
+                Card cardToRemove = new Card();
+                cardToRemove.Init();
+
+                var foundCard = collection.FirstOrDefault(card =>
+                    card.Id == cardToRemove.Id &&
+                    card.Name == cardToRemove.Name &&
+                    card.Time == cardToRemove.Time);
+
+                if (foundCard != null)
+                {
+                    collection.Remove(foundCard);
+                    Console.WriteLine("Элемент удален.");
+                }
+                else
+                {
+                    Console.WriteLine("Элемент не найден.");
+                }
             }
         }
 
-        static void ModifyElement(MyObservableCollection<Card> collection)
+        static void UpdateCardInCollection(MyObservableCollection<Card> collection)
         {
-            Console.WriteLine("Введите индекс элемента для изменения:");
-            if (int.TryParse(Console.ReadLine(), out int index) && index >= 0 && index < collection.Count)
+            if (collection.Count == 0)
             {
-                Card newCard = new Card();
-                newCard.Init();
-                collection[index] = newCard;
-                Console.WriteLine("Элемент изменен.");
+                Console.WriteLine("Коллекция пуста.");
             }
             else
             {
-                Console.WriteLine("Неверный индекс.");
+                Console.WriteLine("Введите данные карты для изменения:");
+                Card cardToUpdate = new Card();
+                cardToUpdate.Init();
+
+                var foundCard = collection.FirstOrDefault(card =>
+                    card.Id == cardToUpdate.Id &&
+                    card.Name == cardToUpdate.Name &&
+                    card.Time == cardToUpdate.Time);
+
+                if (foundCard != null)
+                {
+                    Console.WriteLine("Введите новые данные для карты:");
+                    Card newCardData = new Card();
+                    newCardData.Init();
+
+                    int index = collection.IndexOf(foundCard);
+                    collection[index] = newCardData;
+                    Console.WriteLine("Элемент изменен.");
+                }
+                else
+                {
+                    Console.WriteLine("Элемент не найден.");
+                }
+            }
+        }
+
+        static void PrintCollection(MyObservableCollection<Card> collection)
+        {
+            if (collection.Count == 0)
+            {
+                Console.WriteLine($"Коллекция {collection.Name} пуста.");
+            }
+            else
+            {
+                Console.WriteLine($"Содержимое коллекции {collection.Name}:");
+                foreach (var card in collection)
+                {
+                    Console.WriteLine(card);
+                }
+            }
+        }
+
+        static void PrintJournal(Journal journal)
+        {
+            if (journal.GetEntriesCount() == 0)
+            {
+                Console.WriteLine("Ваш журнал пуст!");
+            }
+            else
+            {
+                Console.WriteLine(journal.ToString());
             }
         }
     }

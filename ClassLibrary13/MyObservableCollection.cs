@@ -1,170 +1,92 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using ClassLibrary13;
 using ClassLibraryLab10;
 
 namespace ClassLibrary12
 {
-    // Определение класса MyObservableCollection<T>
-    public class MyObservableCollection<T> : MyCollectionTree<T> where T : IInit, ICloneable, IComparable, ISummable, new()
+    // Определение делегата для обработки событий
+    public delegate void CollectionHandler(object source, CollectionHandlerEventArgs args);
+
+    public class MyObservableCollection<T> : Collection<T> where T : IInit, ICloneable, new()
     {
-        // Событие для уведомления об изменении коллекции
-        public event CollectionHandler? CollectionChanged;
+        // Поле для хранения имени коллекции
+        public string Name { get; private set; }
 
-        // Событие для уведомления об изменении элемента
-        public event EventHandler<int>? ElementChanged;
-
-        // События для уведомления об изменении количества элементов и изменения ссылки
-        public event CollectionHandler? CollectionCountChanged;
-        public event CollectionHandler? CollectionReferenceChanged;
-
-        // Журнал для записи изменений
-        public Journal Journal { get; set; }
-
-        // Конструктор по умолчанию
-        public MyObservableCollection() : base()
+        // Конструкторы
+        public MyObservableCollection(string name) : base()
         {
-            Journal = new Journal();
+            Name = name;
         }
 
-        // Конструктор с начальным числом элементов
-        public MyObservableCollection(int data) : base(data)
+        public MyObservableCollection(string name, int size) : base(new T[size])
         {
-            Journal = new Journal();
+            Name = name;
         }
 
-        // Конструктор с массивом элементов
-        public MyObservableCollection(T[] collection) : base(collection)
+        public MyObservableCollection(string name, T[] collection) : base(new List<T>(collection))
         {
-            Journal = new Journal();
+            Name = name;
         }
 
-        // Переопределение метода добавления элемента с уведомлением
+        // События
+        public event CollectionHandler CountChanged;
+        public event CollectionHandler ReferenceChanged;
+
+        // Метод для вызова события CountChanged
+        protected virtual void OnCountChanged(object source, CollectionHandlerEventArgs args)
+        {
+            CountChanged?.Invoke(this, args);
+        }
+
+        // Метод для вызова события ReferenceChanged
+        protected virtual void OnReferenceChanged(object source, CollectionHandlerEventArgs args)
+        {
+            ReferenceChanged?.Invoke(this, args);
+        }
+
+        // Переопределим метод Add для вызова события CountChanged
         public new void Add(T item)
         {
             base.Add(item);
-            OnCollectionChanged(new CollectionHandlerEventArgs("Add", item));
-            OnCollectionCountChanged(new CollectionHandlerEventArgs("Added", item));
+            OnCountChanged(this, new CollectionHandlerEventArgs("добавление", item));
         }
 
-        // Переопределение метода удаления элемента с уведомлением
-        public new bool Remove(T item)
+        // Переопределим метод RemoveAt для вызова события CountChanged
+        public new void RemoveAt(int index)
         {
-            bool removed = base.Remove(item);
-            if (removed)
+            if (index >= 0 && index < Count)
             {
-                OnCollectionChanged(new CollectionHandlerEventArgs("Remove", item));
-                OnCollectionCountChanged(new CollectionHandlerEventArgs("Removed", item));
+                var item = this[index];
+                OnCountChanged(this, new CollectionHandlerEventArgs("удаление", item));
+                base.RemoveAt(index);
             }
-            return removed;
         }
 
-        // Переопределение метода очистки коллекции с уведомлением
-        public new void Clear()
-        {
-            base.Clear();
-            OnCollectionChanged(new CollectionHandlerEventArgs("Clear", null));
-        }
-
-        // Индексатор с уведомлением об изменении элемента
+        // Переопределим индексатор для вызова события ReferenceChanged
         public new T this[int index]
         {
-            get
-            {
-                return GetElementAtIndex(index);
-            }
+            get => base[index];
             set
             {
-                var oldValue = GetElementAtIndex(index);
-                SetElementAtIndex(index, value);
-                OnElementChanged(index, oldValue, value);
-                OnCollectionReferenceChanged(new CollectionHandlerEventArgs("Replaced", new { Index = index, NewValue = value }));
+                var oldItem = base[index];
+                base[index] = value;
+                OnReferenceChanged(this, new CollectionHandlerEventArgs("замена", oldItem));
             }
         }
 
-        // Метод для вызова события CollectionChanged
-        protected virtual void OnCollectionChanged(CollectionHandlerEventArgs e)
+        public new bool Remove(T item)
         {
-            CollectionChanged?.Invoke(this, e);
-            Journal.AddEntry(new JournalEntry(nameof(MyObservableCollection<T>), e.ChangeType, e.ChangedItem?.ToString() ?? "null"));
-        }
-
-        // Метод для вызова события ElementChanged
-        protected virtual void OnElementChanged(int index, T oldValue, T newValue)
-        {
-            ElementChanged?.Invoke(this, index);
-            OnCollectionChanged(new CollectionHandlerEventArgs("Replace", new { Index = index, OldValue = oldValue, NewValue = newValue }));
-        }
-
-        // Метод для вызова события CollectionCountChanged
-        protected virtual void OnCollectionCountChanged(CollectionHandlerEventArgs e)
-        {
-            CollectionCountChanged?.Invoke(this, e);
-            Journal.AddEntry(new JournalEntry(nameof(MyObservableCollection<T>), e.ChangeType, e.ChangedItem?.ToString() ?? "null"));
-        }
-
-        // Метод для вызова события CollectionReferenceChanged
-        protected virtual void OnCollectionReferenceChanged(CollectionHandlerEventArgs e)
-        {
-            CollectionReferenceChanged?.Invoke(this, e);
-            Journal.AddEntry(new JournalEntry(nameof(MyObservableCollection<T>), e.ChangeType, e.ChangedItem?.ToString() ?? "null"));
-        }
-
-        // Вспомогательный метод для получения элемента по индексу
-        private T GetElementAtIndex(int index)
-        {
-            if (index < 0 || index >= Count)
+            int index = IndexOf(item);
+            if (index >= 0)
             {
-                throw new ArgumentOutOfRangeException(nameof(index), "Индекс находится вне допустимого диапазона.");
+                OnCountChanged(this, new CollectionHandlerEventArgs("удаление", item));
+                base.RemoveAt(index);
+                return true;
             }
-
-            int currentIndex = 0;
-            foreach (var item in this)
-            {
-                if (currentIndex == index)
-                {
-                    return item;
-                }
-                currentIndex++;
-            }
-
-            throw new InvalidOperationException("Элемент с указанным индексом не найден.");
-        }
-
-        // Вспомогательный метод для установки элемента по индексу
-        private void SetElementAtIndex(int index, T value)
-        {
-            if (index < 0 || index >= Count)
-            {
-                throw new ArgumentOutOfRangeException(nameof(index), "Индекс находится вне допустимого диапазона.");
-            }
-
-            int currentIndex = 0;
-            TreePoint<T> node = root;
-            Stack<TreePoint<T>> stack = new Stack<TreePoint<T>>();
-
-            while (node != null || stack.Count > 0)
-            {
-                while (node != null)
-                {
-                    stack.Push(node);
-                    node = node.Left;
-                }
-
-                node = stack.Pop();
-
-                if (currentIndex == index)
-                {
-                    node.Data = value;
-                    return;
-                }
-
-                currentIndex++;
-                node = node.Right;
-            }
-
-            throw new InvalidOperationException("Элемент с указанным индексом не найден.");
+            return false;
         }
     }
 }
