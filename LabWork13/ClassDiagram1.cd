@@ -1,0 +1,45 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="ClassLibrary12.MyCollectionTree&lt;T&gt;">
+    <Position X="6.5" Y="3.75" Width="1.5" />
+    <TypeIdentifier />
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="ClassLibrary12.MyTree&lt;T&gt;">
+    <Position X="4.75" Y="1.25" Width="1.5" />
+    <TypeIdentifier />
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="ClassLibrary12.TreePoint&lt;T&gt;">
+    <Position X="6.5" Y="1.25" Width="1.5" />
+    <TypeIdentifier />
+  </Class>
+  <Class Name="ClassLibrary13.CollectionHandlerEventArgs">
+    <Position X="14.5" Y="4.25" Width="1.5" />
+    <TypeIdentifier />
+  </Class>
+  <Class Name="ClassLibrary13.Journal">
+    <Position X="12.75" Y="5.25" Width="1.5" />
+    <TypeIdentifier />
+  </Class>
+  <Class Name="ClassLibrary13.JournalEntry">
+    <Position X="12.75" Y="3" Width="1.5" />
+    <TypeIdentifier />
+  </Class>
+  <Class Name="ClassLibrary12.MyObservableCollection&lt;T&gt;">
+    <Position X="11" Y="3" Width="1.5" />
+    <TypeIdentifier />
+  </Class>
+  <Class Name="LabWork13.Program">
+    <Position X="9" Y="1.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>ABAAAAAAAAABAAAAAAAAAAAAAAACAEAAAAAABAAAAAA=</HashCode>
+      <FileName>Program.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Delegate Name="ClassLibrary13.CollectionHandler">
+    <Position X="14.5" Y="3" Width="1.5" />
+    <TypeIdentifier />
+  </Delegate>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>
